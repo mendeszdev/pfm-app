@@ -1,13 +1,125 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
 
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
 }
+
+model User{
+  id String @id @default(uuid())
+  name String
+  email String
+  passwordHash String
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  bankConnections BankConnection[]
+  accounts  Account[]
+  categories Category[]
+  goals Goal[]
+  buggets Budget[]
+  alerts Alert[]
+}
+
+model BankConnection{
+  id String @id @default(uuid())
+  userId String
+  pluggyItemId String 
+  institutionName String
+  insitutuionLogo String?
+  status String
+  lastSyncedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  accounts Account[]
+}
+
+model Account {
+  id               String   @id @default(uuid())
+  userId           String
+  bankConnectionId String
+  pluggyAccountId  String
+  name             String
+  type             String
+  subtype          String?
+  balance          Decimal
+  currency         String   @default("BRL")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  user           User           @relation(fields: [userId], references: [id])
+  bankConnection BankConnection @relation(fields: [bankConnectionId], references: [id])
+  transactions   Transaction[]
+}
+model Transaction {
+  id                   String   @id @default(uuid())
+  accountId            String
+  categoryId           String?
+  pluggyTransactionId  String?
+  description          String
+  amount               Decimal
+  type                 String
+  date                 DateTime
+  isManual             Boolean  @default(false)
+  createdAt            DateTime @default(now())
+
+  account  Account   @relation(fields: [accountId], references: [id])
+  category Category? @relation(fields: [categoryId], references: [id])
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  userId    String?
+  name      String
+  icon      String?
+  color     String?
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user         User?         @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  budgets      Budget[]
+}
+
+model Goal {
+  id            String   @id @default(uuid())
+  userId        String
+  name          String
+  targetAmount  Decimal
+  currentAmount Decimal  @default(0)
+  deadline      DateTime?
+  status        String   @default("active")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model Budget {
+  id          String   @id @default(uuid())
+  userId      String
+  categoryId  String
+  limitAmount Decimal
+  month       Int
+  year        Int
+  createdAt   DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  category Category @relation(fields: [categoryId], references: [id])
+}
+
+model Alert {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  channel   String
+  config    Json
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  }
