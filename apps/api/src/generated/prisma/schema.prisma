@@ -41,8 +41,8 @@ model BankConnection {
 model Account {
   id               String   @id @default(uuid())
   userId           String
-  bankConnectionId String
-  pluggyAccountId  String
+  bankConnectionId String?
+  pluggyAccountId  String?
   name             String
   type             String
   subtype          String?
@@ -51,8 +51,8 @@ model Account {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  user           User           @relation(fields: [userId], references: [id])
-  bankConnection BankConnection @relation(fields: [bankConnectionId], references: [id])
+  user           User            @relation(fields: [userId], references: [id])
+  bankConnection BankConnection? @relation(fields: [bankConnectionId], references: [id])
   transactions   Transaction[]
 }
 

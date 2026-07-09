@@ -4257,8 +4257,8 @@ export namespace Prisma {
   export type AccountGroupByOutputType = {
     id: string
     userId: string
-    bankConnectionId: string
-    pluggyAccountId: string
+    bankConnectionId: string | null
+    pluggyAccountId: string | null
     name: string
     type: string
     subtype: string | null
@@ -4300,7 +4300,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    bankConnection?: boolean | BankConnectionDefaultArgs<ExtArgs>
+    bankConnection?: boolean | Account$bankConnectionArgs<ExtArgs>
     transactions?: boolean | Account$transactionsArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
@@ -4318,7 +4318,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    bankConnection?: boolean | BankConnectionDefaultArgs<ExtArgs>
+    bankConnection?: boolean | Account$bankConnectionArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4334,7 +4334,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
-    bankConnection?: boolean | BankConnectionDefaultArgs<ExtArgs>
+    bankConnection?: boolean | Account$bankConnectionArgs<ExtArgs>
   }, ExtArgs["result"]["account"]>
 
   export type AccountSelectScalar = {
@@ -4354,31 +4354,31 @@ export namespace Prisma {
   export type AccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "bankConnectionId" | "pluggyAccountId" | "name" | "type" | "subtype" | "balance" | "currency" | "createdAt" | "updatedAt", ExtArgs["result"]["account"]>
   export type AccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    bankConnection?: boolean | BankConnectionDefaultArgs<ExtArgs>
+    bankConnection?: boolean | Account$bankConnectionArgs<ExtArgs>
     transactions?: boolean | Account$transactionsArgs<ExtArgs>
     _count?: boolean | AccountCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type AccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    bankConnection?: boolean | BankConnectionDefaultArgs<ExtArgs>
+    bankConnection?: boolean | Account$bankConnectionArgs<ExtArgs>
   }
   export type AccountIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     user?: boolean | UserDefaultArgs<ExtArgs>
-    bankConnection?: boolean | BankConnectionDefaultArgs<ExtArgs>
+    bankConnection?: boolean | Account$bankConnectionArgs<ExtArgs>
   }
 
   export type $AccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Account"
     objects: {
       user: Prisma.$UserPayload<ExtArgs>
-      bankConnection: Prisma.$BankConnectionPayload<ExtArgs>
+      bankConnection: Prisma.$BankConnectionPayload<ExtArgs> | null
       transactions: Prisma.$TransactionPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
-      bankConnectionId: string
-      pluggyAccountId: string
+      bankConnectionId: string | null
+      pluggyAccountId: string | null
       name: string
       type: string
       subtype: string | null
@@ -4781,7 +4781,7 @@ export namespace Prisma {
   export interface Prisma__AccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    bankConnection<T extends BankConnectionDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BankConnectionDefaultArgs<ExtArgs>>): Prisma__BankConnectionClient<$Result.GetResult<Prisma.$BankConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    bankConnection<T extends Account$bankConnectionArgs<ExtArgs> = {}>(args?: Subset<T, Account$bankConnectionArgs<ExtArgs>>): Prisma__BankConnectionClient<$Result.GetResult<Prisma.$BankConnectionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     transactions<T extends Account$transactionsArgs<ExtArgs> = {}>(args?: Subset<T, Account$transactionsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TransactionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -5221,6 +5221,25 @@ export namespace Prisma {
      * Limit how many Accounts to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Account.bankConnection
+   */
+  export type Account$bankConnectionArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the BankConnection
+     */
+    select?: BankConnectionSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the BankConnection
+     */
+    omit?: BankConnectionOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BankConnectionInclude<ExtArgs> | null
+    where?: BankConnectionWhereInput
   }
 
   /**
@@ -11424,8 +11443,8 @@ export namespace Prisma {
     NOT?: AccountWhereInput | AccountWhereInput[]
     id?: StringFilter<"Account"> | string
     userId?: StringFilter<"Account"> | string
-    bankConnectionId?: StringFilter<"Account"> | string
-    pluggyAccountId?: StringFilter<"Account"> | string
+    bankConnectionId?: StringNullableFilter<"Account"> | string | null
+    pluggyAccountId?: StringNullableFilter<"Account"> | string | null
     name?: StringFilter<"Account"> | string
     type?: StringFilter<"Account"> | string
     subtype?: StringNullableFilter<"Account"> | string | null
@@ -11434,15 +11453,15 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    bankConnection?: XOR<BankConnectionScalarRelationFilter, BankConnectionWhereInput>
+    bankConnection?: XOR<BankConnectionNullableScalarRelationFilter, BankConnectionWhereInput> | null
     transactions?: TransactionListRelationFilter
   }
 
   export type AccountOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
-    bankConnectionId?: SortOrder
-    pluggyAccountId?: SortOrder
+    bankConnectionId?: SortOrderInput | SortOrder
+    pluggyAccountId?: SortOrderInput | SortOrder
     name?: SortOrder
     type?: SortOrder
     subtype?: SortOrderInput | SortOrder
@@ -11461,8 +11480,8 @@ export namespace Prisma {
     OR?: AccountWhereInput[]
     NOT?: AccountWhereInput | AccountWhereInput[]
     userId?: StringFilter<"Account"> | string
-    bankConnectionId?: StringFilter<"Account"> | string
-    pluggyAccountId?: StringFilter<"Account"> | string
+    bankConnectionId?: StringNullableFilter<"Account"> | string | null
+    pluggyAccountId?: StringNullableFilter<"Account"> | string | null
     name?: StringFilter<"Account"> | string
     type?: StringFilter<"Account"> | string
     subtype?: StringNullableFilter<"Account"> | string | null
@@ -11471,15 +11490,15 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Account"> | Date | string
     updatedAt?: DateTimeFilter<"Account"> | Date | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
-    bankConnection?: XOR<BankConnectionScalarRelationFilter, BankConnectionWhereInput>
+    bankConnection?: XOR<BankConnectionNullableScalarRelationFilter, BankConnectionWhereInput> | null
     transactions?: TransactionListRelationFilter
   }, "id">
 
   export type AccountOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
-    bankConnectionId?: SortOrder
-    pluggyAccountId?: SortOrder
+    bankConnectionId?: SortOrderInput | SortOrder
+    pluggyAccountId?: SortOrderInput | SortOrder
     name?: SortOrder
     type?: SortOrder
     subtype?: SortOrderInput | SortOrder
@@ -11500,8 +11519,8 @@ export namespace Prisma {
     NOT?: AccountScalarWhereWithAggregatesInput | AccountScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Account"> | string
     userId?: StringWithAggregatesFilter<"Account"> | string
-    bankConnectionId?: StringWithAggregatesFilter<"Account"> | string
-    pluggyAccountId?: StringWithAggregatesFilter<"Account"> | string
+    bankConnectionId?: StringNullableWithAggregatesFilter<"Account"> | string | null
+    pluggyAccountId?: StringNullableWithAggregatesFilter<"Account"> | string | null
     name?: StringWithAggregatesFilter<"Account"> | string
     type?: StringWithAggregatesFilter<"Account"> | string
     subtype?: StringNullableWithAggregatesFilter<"Account"> | string | null
@@ -12055,7 +12074,7 @@ export namespace Prisma {
 
   export type AccountCreateInput = {
     id?: string
-    pluggyAccountId: string
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -12064,15 +12083,15 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutAccountsInput
-    bankConnection: BankConnectionCreateNestedOneWithoutAccountsInput
+    bankConnection?: BankConnectionCreateNestedOneWithoutAccountsInput
     transactions?: TransactionCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUncheckedCreateInput = {
     id?: string
     userId: string
-    bankConnectionId: string
-    pluggyAccountId: string
+    bankConnectionId?: string | null
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -12085,7 +12104,7 @@ export namespace Prisma {
 
   export type AccountUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12094,15 +12113,15 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutAccountsNestedInput
-    bankConnection?: BankConnectionUpdateOneRequiredWithoutAccountsNestedInput
+    bankConnection?: BankConnectionUpdateOneWithoutAccountsNestedInput
     transactions?: TransactionUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    bankConnectionId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    bankConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12116,8 +12135,8 @@ export namespace Prisma {
   export type AccountCreateManyInput = {
     id?: string
     userId: string
-    bankConnectionId: string
-    pluggyAccountId: string
+    bankConnectionId?: string | null
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -12129,7 +12148,7 @@ export namespace Prisma {
 
   export type AccountUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12142,8 +12161,8 @@ export namespace Prisma {
   export type AccountUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    bankConnectionId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    bankConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -12799,9 +12818,9 @@ export namespace Prisma {
     not?: NestedDecimalFilter<$PrismaModel> | Decimal | DecimalJsLike | number | string
   }
 
-  export type BankConnectionScalarRelationFilter = {
-    is?: BankConnectionWhereInput
-    isNot?: BankConnectionWhereInput
+  export type BankConnectionNullableScalarRelationFilter = {
+    is?: BankConnectionWhereInput | null
+    isNot?: BankConnectionWhereInput | null
   }
 
   export type TransactionListRelationFilter = {
@@ -13548,10 +13567,12 @@ export namespace Prisma {
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutAccountsInput, UserUpdateWithoutAccountsInput>, UserUncheckedUpdateWithoutAccountsInput>
   }
 
-  export type BankConnectionUpdateOneRequiredWithoutAccountsNestedInput = {
+  export type BankConnectionUpdateOneWithoutAccountsNestedInput = {
     create?: XOR<BankConnectionCreateWithoutAccountsInput, BankConnectionUncheckedCreateWithoutAccountsInput>
     connectOrCreate?: BankConnectionCreateOrConnectWithoutAccountsInput
     upsert?: BankConnectionUpsertWithoutAccountsInput
+    disconnect?: BankConnectionWhereInput | boolean
+    delete?: BankConnectionWhereInput | boolean
     connect?: BankConnectionWhereUniqueInput
     update?: XOR<XOR<BankConnectionUpdateToOneWithWhereWithoutAccountsInput, BankConnectionUpdateWithoutAccountsInput>, BankConnectionUncheckedUpdateWithoutAccountsInput>
   }
@@ -14040,7 +14061,7 @@ export namespace Prisma {
 
   export type AccountCreateWithoutUserInput = {
     id?: string
-    pluggyAccountId: string
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -14048,14 +14069,14 @@ export namespace Prisma {
     currency?: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    bankConnection: BankConnectionCreateNestedOneWithoutAccountsInput
+    bankConnection?: BankConnectionCreateNestedOneWithoutAccountsInput
     transactions?: TransactionCreateNestedManyWithoutAccountInput
   }
 
   export type AccountUncheckedCreateWithoutUserInput = {
     id?: string
-    bankConnectionId: string
-    pluggyAccountId: string
+    bankConnectionId?: string | null
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -14248,8 +14269,8 @@ export namespace Prisma {
     NOT?: AccountScalarWhereInput | AccountScalarWhereInput[]
     id?: StringFilter<"Account"> | string
     userId?: StringFilter<"Account"> | string
-    bankConnectionId?: StringFilter<"Account"> | string
-    pluggyAccountId?: StringFilter<"Account"> | string
+    bankConnectionId?: StringNullableFilter<"Account"> | string | null
+    pluggyAccountId?: StringNullableFilter<"Account"> | string | null
     name?: StringFilter<"Account"> | string
     type?: StringFilter<"Account"> | string
     subtype?: StringNullableFilter<"Account"> | string | null
@@ -14414,7 +14435,7 @@ export namespace Prisma {
 
   export type AccountCreateWithoutBankConnectionInput = {
     id?: string
-    pluggyAccountId: string
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -14429,7 +14450,7 @@ export namespace Prisma {
   export type AccountUncheckedCreateWithoutBankConnectionInput = {
     id?: string
     userId: string
-    pluggyAccountId: string
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -14711,7 +14732,7 @@ export namespace Prisma {
 
   export type AccountCreateWithoutTransactionsInput = {
     id?: string
-    pluggyAccountId: string
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -14720,14 +14741,14 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     user: UserCreateNestedOneWithoutAccountsInput
-    bankConnection: BankConnectionCreateNestedOneWithoutAccountsInput
+    bankConnection?: BankConnectionCreateNestedOneWithoutAccountsInput
   }
 
   export type AccountUncheckedCreateWithoutTransactionsInput = {
     id?: string
     userId: string
-    bankConnectionId: string
-    pluggyAccountId: string
+    bankConnectionId?: string | null
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -14782,7 +14803,7 @@ export namespace Prisma {
 
   export type AccountUpdateWithoutTransactionsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -14791,14 +14812,14 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     user?: UserUpdateOneRequiredWithoutAccountsNestedInput
-    bankConnection?: BankConnectionUpdateOneRequiredWithoutAccountsNestedInput
+    bankConnection?: BankConnectionUpdateOneWithoutAccountsNestedInput
   }
 
   export type AccountUncheckedUpdateWithoutTransactionsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    bankConnectionId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    bankConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15311,8 +15332,8 @@ export namespace Prisma {
 
   export type AccountCreateManyUserInput = {
     id?: string
-    bankConnectionId: string
-    pluggyAccountId: string
+    bankConnectionId?: string | null
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -15394,7 +15415,7 @@ export namespace Prisma {
 
   export type AccountUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15402,14 +15423,14 @@ export namespace Prisma {
     currency?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    bankConnection?: BankConnectionUpdateOneRequiredWithoutAccountsNestedInput
+    bankConnection?: BankConnectionUpdateOneWithoutAccountsNestedInput
     transactions?: TransactionUpdateManyWithoutAccountNestedInput
   }
 
   export type AccountUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    bankConnectionId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    bankConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15422,8 +15443,8 @@ export namespace Prisma {
 
   export type AccountUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    bankConnectionId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    bankConnectionId?: NullableStringFieldUpdateOperationsInput | string | null
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15554,7 +15575,7 @@ export namespace Prisma {
   export type AccountCreateManyBankConnectionInput = {
     id?: string
     userId: string
-    pluggyAccountId: string
+    pluggyAccountId?: string | null
     name: string
     type: string
     subtype?: string | null
@@ -15566,7 +15587,7 @@ export namespace Prisma {
 
   export type AccountUpdateWithoutBankConnectionInput = {
     id?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15581,7 +15602,7 @@ export namespace Prisma {
   export type AccountUncheckedUpdateWithoutBankConnectionInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
@@ -15595,7 +15616,7 @@ export namespace Prisma {
   export type AccountUncheckedUpdateManyWithoutBankConnectionInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    pluggyAccountId?: StringFieldUpdateOperationsInput | string
+    pluggyAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     name?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     subtype?: NullableStringFieldUpdateOperationsInput | string | null
