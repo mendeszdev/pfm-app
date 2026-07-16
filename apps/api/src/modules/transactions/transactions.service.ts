@@ -1,132 +1,160 @@
 import prisma from "../../lib/prisma";
 import type {
-    CreateTransactionDto,
-    UpdateTransactionDto,
-    TransactionResponse,
-    TransactionFilters
+  CreateTransactionDTO,
+  UpdateTransactionDTO,
+  TransactionFilters,
+  TransactionResponse,
 } from "./transactions.types";
 
 function formatTransaction(transaction: any): TransactionResponse {
-    return {
-        id: transaction.id,
-        accountId: transaction.accountId,
-        categoryId: transaction.categoryId,
-        description: transaction.description || null,
-        amount: Number(transaction.amount),
-        type: transaction.type,
-        createdAt: transaction.createdAt,
-        isManual: transaction.isManual,
-    };
+  return {
+    id: transaction.id,
+    accountId: transaction.accountId,
+    categoryId: transaction.categoryId,
+    description: transaction.description,
+    amount: Number(transaction.amount),
+    type: transaction.type,
+    date: transaction.date,
+    isManual: transaction.isManual,
+    createdAt: transaction.createdAt,
+  };
 }
 
-export async function createTransaction(userId: string, data: CreateTransactionDto): Promise<TransactionResponse> {
-    const account = await prisma.account.findFirst({
-        where: { id: data.accountId, userId }
-    });
-    if (!account) {
-        throw new Error("Conta não encontrada.");
-    }
+export async function createTransaction(
+  userId: string,
+  data: CreateTransactionDTO,
+): Promise<TransactionResponse> {
+  const account = await prisma.account.findFirst({
+    where: { id: data.accountId, userId },
+  });
 
-    const transaction = await prisma.transaction.create({
-        data: {
-            accountId: data.accountId,
-            amount: data.amount,
-            type: data.type,
-            categoryId: data.categoryId,
-            description: data.description ?? "",
-            date: new Date(data.date),
-            isManual: true
-        }
-    })
+  if (!account) {
+    throw new Error("ACCOUNT_NOT_FOUND");
+  }
 
-    await prisma.account.update({
+  const transaction = await prisma.transaction.create({
+    data: {
+      accountId: data.accountId,
+      categoryId: data.categoryId ?? null,
+      description: data.description ?? null,
+      amount: data.amount,
+      type: data.type,
+      date: new Date(data.date),
+      isManual: true,
+    },
+  });
+
+  await prisma.account.update({
     where: { id: data.accountId },
     data: {
-        balance: data.type === "INCOME"
-        ? Number(account.balance) + data.amount
-        : Number(account.balance) - data.amount
-     }
-    })
-    return formatTransaction(transaction);
+      balance:
+        data.type === "INCOME"
+          ? Number(account.balance) + data.amount
+          : Number(account.balance) - data.amount,
+    },
+  });
+
+  return formatTransaction(transaction);
 }
 
+export async function getTransactions(
+  userId: string,
+  filters: TransactionFilters,
+): Promise<TransactionResponse[]> {
+  const transactions = await prisma.transaction.findMany({
+    where: {
+      account: { userId },
+      ...(filters.accountId && { accountId: filters.accountId }),
+      ...(filters.categoryId && { categoryId: filters.categoryId }),
+      ...(filters.type && { type: filters.type }),
+      ...(filters.startDate &&
+        filters.endDate && {
+          date: {
+            gte: new Date(filters.startDate),
+            lte: new Date(filters.endDate),
+          },
+        }),
+    },
+    orderBy: { date: "desc" },
+  });
 
-export async function getTransactions(userId: string, filters: TransactionFilters): Promise<TransactionResponse[]> {
-    const transactions = await prisma.transaction.findMany({
-        where: {
-            account:{userId},
-            ...(filters.accountId && { accountId: filters.accountId }),
-            ...(filters.categoryId && { categoryId: filters.categoryId }),
-            ...(filters.type ? { type: filters.type } : {}),
-            ...(filters.startDate && filters.endDate ? { date: { gte: filters.startDate, lte: filters.endDate } } : {
-                date: {
-                    gte: filters.startDate,
-                    lte: filters.endDate
-                }
-            }),
-            },
-            orderBy: {
-                date: "desc"
-        }
-    });
-    return transactions.map(formatTransaction);
+  return transactions.map(formatTransaction);
 }
 
-export async function getTransactionById(userId: string, transactionId: string): Promise<TransactionResponse> {
-    const transaction = await prisma.transaction.findUnique({
-        where: { id: transactionId, account: { userId } }
-    });
-    if (!transaction) {
-        throw new Error("Transação não encontrada.");
-    }
-    return formatTransaction(transaction);
+export async function getTransactionById(
+  userId: string,
+  transactionId: string,
+): Promise<TransactionResponse> {
+  const transaction = await prisma.transaction.findFirst({
+    where: {
+      id: transactionId,
+      account: { userId },
+    },
+  });
+
+  if (!transaction) {
+    throw new Error("TRANSACTION_NOT_FOUND");
+  }
+
+  return formatTransaction(transaction);
 }
 
-export async function updateTransaction(userId: string, transactionId: string, data: UpdateTransactionDto): Promise<TransactionResponse> {
-    const account = await prisma.account.findFirst({
-        where: { id: transactionId, userId }
-    })
-    
-    if(!account) {
-        throw new Error("Conta não encontrada.");
-    }
+export async function updateTransaction(
+  userId: string,
+  transactionId: string,
+  data: UpdateTransactionDTO,
+): Promise<TransactionResponse> {
+  const existing = await prisma.transaction.findFirst({
+    where: {
+      id: transactionId,
+      account: { userId },
+    },
+  });
 
-    const transaction = await prisma.transaction.update({
-        where: { id: transactionId },
-        data: {
-           ...(data.description && { description: data.description }),
-           ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
-           ...(data.amount !== undefined && { amount: data.amount}),
-           ...(data.type && { type: data.type}),
-           ...(data.date && { date: data.date})
-        }
-    });
-    return formatTransaction(transaction);
+  if (!existing) {
+    throw new Error("TRANSACTION_NOT_FOUND");
+  }
+
+  const transaction = await prisma.transaction.update({
+    where: { id: transactionId },
+    data: {
+      ...(data.description && { description: data.description }),
+      ...(data.categoryId !== undefined && { categoryId: data.categoryId }),
+      ...(data.amount !== undefined && { amount: data.amount }),
+      ...(data.type && { type: data.type }),
+      ...(data.date && { date: new Date(data.date) }),
+    },
+  });
+
+  return formatTransaction(transaction);
 }
 
-export async function deleteTransaction(userId: string, transactionId: string): Promise<void> {
-    const existing = await prisma.transaction.findFirst({
-        where: {trasactionId: transactionId,
-        account: {userId}
-     }   
-    })
+export async function deleteTransaction(
+  userId: string,
+  transactionId: string,
+): Promise<void> {
+  const existing = await prisma.transaction.findFirst({
+    where: {
+      id: transactionId,
+      account: { userId },
+    },
+  });
 
-    if(!existing){
-        throw new Error ("Transação não encontrada")
-    }
-    
-    const transaction = await prisma.transaction.delete({
-        where: { id: transactionId}
-    });
+  if (!existing) {
+    throw new Error("TRANSACTION_NOT_FOUND");
+  }
 
-    await prisma.account.update({
-        where: {id: existing.accountId},
-        data: {
-            balance: existing.type === "INCOME"
-            ? { decrement: Number(existing.amount)}
-            : { increment: Number(existing.amount)
-            }
-        }
-    })
+  await prisma.transaction.delete({
+    where: { id: transactionId },
+  });
+
+  await prisma.account.update({
+    where: { id: existing.accountId },
+    data: {
+      balance:
+        existing.type === "INCOME"
+          ? { decrement: Number(existing.amount) }
+          : { increment: Number(existing.amount) },
+    },
+  });
 }
-

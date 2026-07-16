@@ -1,15 +1,15 @@
 export type TransactionType = 'INCOME' | 'EXPENSE';
 
-export interface CreateTransactionDto {
+export interface CreateTransactionDTO {
     accountId: string;
     amount: number;
     type: TransactionType;
     categoryId?: string;
-    description?: string;
+    description: string;
     date: Date;
 }
 
-export interface UpdateTransactionDto {
+export interface UpdateTransactionDTO {
     amount?: number;
     type?: TransactionType;
     categoryId?: string;
@@ -17,7 +17,7 @@ export interface UpdateTransactionDto {
     date?: Date;
 }
 
-export interface deleteTransactionDto {
+export interface deleteTransactionDTO {
     transactionId: string;
 }
 
@@ -37,6 +37,7 @@ export interface TransactionResponse{
     description?: string | null;
     amount: number;
     type: TransactionType;
+    date: Date,
     createdAt: Date;
     isManual: boolean;
 }
