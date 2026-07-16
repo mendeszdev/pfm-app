@@ -30,53 +30,65 @@ export async function accountRoutes(app: FastifyInstance) {
     }
   });
 
-
   app.post<{ Body: CreateAccountDTO }>("/accounts", async (request, reply) => {
-    try{
-        const userId = (request.user as { id: string }).id;
-        const account = await createAccount(userId, request.body);
-        return reply.status(201).send(account);
+    try {
+      const userId = (request.user as { id: string }).id;
+      const account = await createAccount(userId, request.body);
+      return reply.status(201).send(account);
     } catch (error: any) {
       return reply.status(500).send({ message: "Erro interno do servidor." });
     }
   });
-  
-   app.get<{ Params: { id: string } }>("/accounts/:id", async (request, reply) => {
-    try {
-      const userId = (request.user as { id: string }).id;
-      const account = await getAccountById(userId, request.params.id);
-      return reply.status(200).send(account);
-    } catch (error: any) {
-        if (error.message.includes("Conta não encontrada")) {
-            return reply.status(404).send({ message: error.message });
-        }
-        return reply.status(500).send({ message: "Erro interno do servidor." });
-    }
-  });
 
-  app.patch<{ Params: { id: string }; Body: UpdateAccountDTO }>("/accounts/:id", async (request, reply) => {
-    try{
+  app.get<{ Params: { id: string } }>(
+    "/accounts/:id",
+    async (request, reply) => {
+      try {
         const userId = (request.user as { id: string }).id;
-        const account = await updateAccount(userId, request.params.id, request.body);
+        const account = await getAccountById(userId, request.params.id);
         return reply.status(200).send(account);
-    } catch (error: any) {
+      } catch (error: any) {
         if (error.message.includes("Conta não encontrada")) {
-            return reply.status(404).send({ message: error.message });
+          return reply.status(404).send({ message: error.message });
         }
         return reply.status(500).send({ message: "Erro interno do servidor." });
-    }
-  });
+      }
+    },
+  );
 
-  app.delete<{ Params: { id: string } }>("/accounts/:id", async (request, reply) => {
-    try{
+  app.patch<{ Params: { id: string }; Body: UpdateAccountDTO }>(
+    "/accounts/:id",
+    async (request, reply) => {
+      try {
+        const userId = (request.user as { id: string }).id;
+        const account = await updateAccount(
+          userId,
+          request.params.id,
+          request.body,
+        );
+        return reply.status(200).send(account);
+      } catch (error: any) {
+        if (error.message.includes("Conta não encontrada")) {
+          return reply.status(404).send({ message: error.message });
+        }
+        return reply.status(500).send({ message: "Erro interno do servidor." });
+      }
+    },
+  );
+
+  app.delete<{ Params: { id: string } }>(
+    "/accounts/:id",
+    async (request, reply) => {
+      try {
         const userId = (request.user as { id: string }).id;
         await deleteAccount(userId, request.params.id);
         return reply.status(204).send();
-    } catch (error: any) {
+      } catch (error: any) {
         if (error.message.includes("Conta não encontrada")) {
-            return reply.status(404).send({ message: error.message });
+          return reply.status(404).send({ message: error.message });
         }
         return reply.status(500).send({ message: "Erro interno do servidor." });
-    }
-  });
+      }
+    },
+  );
 }
