@@ -4,6 +4,7 @@ import jwt from "@fastify/jwt";
 import "dotenv/config";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { accountRoutes } from "./modules/accounts/account.routes";
+import { transactionRoutes } from "./modules/transactions/transactions.routes";
 
 const app = Fastify({
   logger: true,
@@ -20,7 +21,7 @@ async function bootstrap() {
 
   await app.register(authRoutes);
   await app.register(accountRoutes);
-
+  await app.register(transactionRoutes);
   app.get("/health", async () => {
     return { status: "ok" };
   })
