@@ -29,7 +29,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         const transaction = await createTransaction(userId, request.body);
         return reply.status(201).send(transaction);
       } catch (error: any) {
-        if (error.message === "Conta não encontrada") {
+        if (error.message === "ACCOUNT_NOT_FOUND") {
           return reply.status(404).send({ message: "Conta não encontrada" });
         }
         return reply.status(500).send({ message: "Erro interno do servidor" });
@@ -58,7 +58,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         const transaction = await getTransactionById(userId, request.params.id);
         return reply.status(200).send(transaction);
       } catch (error: any) {
-        if (error.message === "Transação não encontrada") {
+        if (error.message === "TRANSACTION_NOT_FOUND") {
           return reply
             .status(404)
             .send({ message: "Transação não encontrada" });
@@ -80,7 +80,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         );
         return reply.status(200).send(transaction);
       } catch (error: any) {
-        if (error.message === "Transação não encontrada") {
+        if (error.message === "TRANSACTION_NOT_FOUND") {
           return reply
             .status(404)
             .send({ message: "Transação não encontrada" });
@@ -98,7 +98,7 @@ export async function transactionRoutes(app: FastifyInstance) {
         await deleteTransaction(userId, request.params.id);
         return reply.status(204).send();
       } catch (error: any) {
-        if (error.message === "Transação não encontrada") {
+        if (error.message === "TRANSACTION_NOT_FOUND") {
           return reply
             .status(404)
             .send({ message: "Transação não encontrada" });

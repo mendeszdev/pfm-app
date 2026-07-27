@@ -48,8 +48,8 @@ export async function accountRoutes(app: FastifyInstance) {
         const account = await getAccountById(userId, request.params.id);
         return reply.status(200).send(account);
       } catch (error: any) {
-        if (error.message.includes("Conta não encontrada")) {
-          return reply.status(404).send({ message: error.message });
+        if (error.message === "ACCOUNT_NOT_FOUND") {
+          return reply.status(404).send({ message: "Conta não encontrada." });
         }
         return reply.status(500).send({ message: "Erro interno do servidor." });
       }
@@ -68,8 +68,8 @@ export async function accountRoutes(app: FastifyInstance) {
         );
         return reply.status(200).send(account);
       } catch (error: any) {
-        if (error.message.includes("Conta não encontrada")) {
-          return reply.status(404).send({ message: error.message });
+        if (error.message === "ACCOUNT_NOT_FOUND") {
+          return reply.status(404).send({ message: "Conta não encontrada." });
         }
         return reply.status(500).send({ message: "Erro interno do servidor." });
       }
@@ -84,8 +84,8 @@ export async function accountRoutes(app: FastifyInstance) {
         await deleteAccount(userId, request.params.id);
         return reply.status(204).send();
       } catch (error: any) {
-        if (error.message.includes("Conta não encontrada")) {
-          return reply.status(404).send({ message: error.message });
+        if (error.message === "ACCOUNT_NOT_FOUND") {
+          return reply.status(404).send({ message: "Conta não encontrada." });
         }
         return reply.status(500).send({ message: "Erro interno do servidor." });
       }

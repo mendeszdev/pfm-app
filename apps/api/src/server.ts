@@ -5,7 +5,7 @@ import "dotenv/config";
 import { authRoutes } from "./modules/auth/auth.routes";
 import { accountRoutes } from "./modules/accounts/account.routes";
 import { transactionRoutes } from "./modules/transactions/transactions.routes";
-
+import { alertRoutes } from "./modules/alerts/alert.routes";
 const app = Fastify({
   logger: true,
 });
@@ -22,6 +22,7 @@ async function bootstrap() {
   await app.register(authRoutes);
   await app.register(accountRoutes);
   await app.register(transactionRoutes);
+  await app.register(alertRoutes)
   app.get("/health", async () => {
     return { status: "ok" };
   })

@@ -40,10 +40,6 @@ export async function getAccounts(userId: string, accountId?: string): Promise<A
         where:{ id: accountId, userId }
     })
 
-    if (!accounts) {
-        throw new Error("Nenhuma conta encontrada.")
-    }
-
     return accounts.map(formatAccount)
 }
 
@@ -61,23 +57,16 @@ export async function getAccountById(userId: string, accountId: string): Promise
 
 export async function updateAccount(userId: string, accountId: string, data: UpdateAccountDTO): Promise<AccountResponse> {
 
-    const account = await prisma.account.updateMany({
-        where: { id: accountId, userId },
-        data: {
-            name: data.name || undefined,
-            type: data.type || undefined,
-            subtype: data.subtype || null,
-            balance: data.balance || undefined,
-            currency: data.currency || undefined,
-        }
+    const account = await prisma.account.findFirst({
+        where: { id: accountId, userId }
     })
 
     if (!account) {
-        throw new Error("Conta não encontrada.")
+        throw new Error("ACCOUNT_NOT_FOUND")
     }
 
     const updatedAccount = await prisma.account.update({
-        where: { id: accountId, userId },
+        where: { id: accountId },
 
         data: {
             ...(data.name && { name: data.name }),
@@ -97,14 +86,10 @@ export async function deleteAccount(userId: string, accountId: string): Promise<
     })
 
     if (!account) {
-        throw new Error("Conta não encontrada.")
+        throw new Error("ACCOUNT_NOT_FOUND")
     }
 
     await prisma.account.delete({
-        where: { id: accountId, userId }
-    })
-
-    const deletedAccount = await prisma.account.delete({
         where: { id: accountId, userId }
     })
 }
