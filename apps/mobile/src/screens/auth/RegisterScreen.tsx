@@ -51,8 +51,7 @@ export default function RegisterScreen({ navigation }: Props) {
       });
       await setAuth(data.token, data.user);
     } catch (error: any) {
-      const message =
-        error.response?.data?.message ?? "Erro ao registrar usuário";
+      const message = error.response?.data?.message ?? "Erro ao criar conta";
       Alert.alert("Erro", message);
     } finally {
       setLoading(false);
