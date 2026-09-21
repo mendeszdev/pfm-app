@@ -1,224 +1,200 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
-  Alert,
   ScrollView,
-} from "react-native";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AuthStackParamList } from "../../navigation/AuthNavigator";
-import { useAuthStore } from "../../store/auth.store";
-import { theme } from "../../theme";
-import api from "../../services/api";
+} from "react-native"
+import { NativeStackScreenProps } from "@react-navigation/native-stack"
+import { AuthStackParamList } from "../../navigation/AuthNavigator"
+import { useAuthStore } from "../../store/auth.store"
+import { theme } from "../../theme"
+import api from "../../services/api"
 
-type Props = NativeStackScreenProps<AuthStackParamList, "Register">;
+type Props = NativeStackScreenProps<AuthStackParamList, "Register">
+
 export default function RegisterScreen({ navigation }: Props) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { setAuth } = useAuthStore();
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+  const [errors, setErrors] = useState<{
+    name?: string
+    email?: string
+    password?: string
+    confirmPassword?: string
+  }>({})
+  const { setAuth } = useAuthStore()
 
   async function handleRegister() {
-    if (!name || !email || !password) {
-      Alert.alert("Atenção", "Preencha todos os campos");
-      return;
-    }
+    const newErrors: typeof errors = {}
 
-    if (password.length < 6) {
-      Alert.alert("Atenção", "A senha deve ter no mínimo 6 caracteres");
-      return;
-    }
+    if (!name) newErrors.name = "Campo obrigatório."
+    if (!email) newErrors.email = "Campo obrigatório."
+    if (password.length < 6) newErrors.password = "Mínimo de 6 caracteres."
+    if (password !== confirmPassword) newErrors.confirmPassword = "As senhas não coincidem."
 
-    if (password !== confirmPassword) {
-      Alert.alert("Atenção", "As senhas não coincidem");
-      return;
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors)
+      return
     }
 
     try {
-      setLoading(true);
-      const { data } = await api.post("/auth/register", {
-        name,
-        email,
-        password,
-      });
-      await setAuth(data.token, data.user);
+      setLoading(true)
+      const { data } = await api.post("/auth/register", { name, email, password })
+      await setAuth(data.token, data.user)
     } catch (error: any) {
-      const message = error.response?.data?.message ?? "Erro ao criar conta";
-      Alert.alert("Erro", message);
+      if (error.response?.status === 409) {
+        setErrors({ email: "Este e-mail já está cadastrado." })
+      } else {
+        setErrors({ email: error.response?.data?.message ?? "Erro ao criar conta" })
+      }
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
   }
 
   return (
     <KeyboardAvoidingView
-      style={styles.container}
+      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView
-        contentContainerStyle={styles.content}
+        contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 24, paddingVertical: 48, justifyContent: "center" }}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.header}>
-          <Text style={styles.title}>Criar Conta</Text>
-          <Text style={styles.subtitle}>
-            Comece já sua jornada financeira! Preencha os campos abaixo para
-            criar sua conta
+        {/* Logo */}
+        <View>
+          <Text className="text-[40px] font-bold text-ink" style={{ letterSpacing: -2 }}>PFM</Text>
+          <Text className="text-[11px] font-mono text-ink2 uppercase mt-1" style={{ letterSpacing: 2 }}>
+            Finanças pessoais
           </Text>
         </View>
 
-        <View style={styles.form}>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Nome</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite seu nome completo"
-              placeholderTextColor={theme.colors.textSecondary}
-              autoCapitalize="words"
-              value={name}
-              onChangeText={setName}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Email</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite seu email"
-              placeholderTextColor={theme.colors.textSecondary}
-              autoCapitalize="none"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={setEmail}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Senha</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Digite sua senha. Mínimo 6 caracteres"
-              placeholderTextColor={theme.colors.textSecondary}
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-            />
-          </View>
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>Confirmar Senha</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="Confirme sua senha"
-              placeholderTextColor={theme.colors.textSecondary}
-              secureTextEntry
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-          </View>
+        {/* Headline */}
+        <Text className="text-[24px] font-bold text-ink mt-8">Criar conta</Text>
+        <Text className="text-[14px] text-ink2 mt-1 mb-8">Leva menos de um minuto.</Text>
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleRegister}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Criar Conta</Text>
-            )}
-          </TouchableOpacity>
+        {/* NOME */}
+        <Text className="text-[11px] font-medium text-ink uppercase mb-1.5" style={{ letterSpacing: 1 }}>
+          NOME
+        </Text>
+        <TextInput
+          className="border border-line bg-surface2 h-12 px-3 text-[16px] text-ink"
+          style={{ borderRadius: 0 }}
+          placeholder=""
+          placeholderTextColor={theme.colors.ink2}
+          autoCapitalize="words"
+          value={name}
+          onChangeText={(v) => {
+            setErrors((prev) => ({ ...prev, name: undefined }))
+            setName(v)
+          }}
+        />
+        {errors.name && <Text className="text-[12px] text-neg mt-1">{errors.name}</Text>}
 
+        {/* E-MAIL */}
+        <Text className="text-[11px] font-medium text-ink uppercase mt-4 mb-1.5" style={{ letterSpacing: 1 }}>
+          E-MAIL
+        </Text>
+        <TextInput
+          className="border border-line bg-surface2 h-12 px-3 text-[16px] text-ink"
+          style={{ borderRadius: 0 }}
+          placeholder=""
+          placeholderTextColor={theme.colors.ink2}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          value={email}
+          onChangeText={(v) => {
+            setErrors((prev) => ({ ...prev, email: undefined }))
+            setEmail(v)
+          }}
+        />
+        {errors.email && <Text className="text-[12px] text-neg mt-1">{errors.email}</Text>}
+
+        {/* SENHA */}
+        <Text className="text-[11px] font-medium text-ink uppercase mt-4 mb-1.5" style={{ letterSpacing: 1 }}>
+          SENHA
+        </Text>
+        <View className="flex-row">
+          <TextInput
+            className="flex-1 border border-line bg-surface2 h-12 px-3 text-[16px] text-ink"
+            style={{ borderRadius: 0 }}
+            placeholder=""
+            placeholderTextColor={theme.colors.ink2}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={(v) => {
+              setErrors((prev) => ({ ...prev, password: undefined }))
+              setPassword(v)
+            }}
+          />
           <TouchableOpacity
-            style={styles.linkButton}
-            onPress={() => navigation.goBack()}
+            className="border border-l-0 border-line bg-surface2 h-12 px-3 justify-center"
+            onPress={() => setShowPassword((prev) => !prev)}
           >
-            <Text style={styles.linkText}>
-              Já possui uma conta?{" "}
-              <Text style={styles.linkTextBold}>Entrar</Text>
-            </Text>
+            <Text className="text-[12px] text-ink2">{showPassword ? "OCULTAR" : "VER"}</Text>
           </TouchableOpacity>
         </View>
+        {errors.password && <Text className="text-[12px] text-neg mt-1">{errors.password}</Text>}
+
+        {/* CONFIRMAR SENHA */}
+        <Text className="text-[11px] font-medium text-ink uppercase mt-4 mb-1.5" style={{ letterSpacing: 1 }}>
+          CONFIRMAR SENHA
+        </Text>
+        <View className="flex-row">
+          <TextInput
+            className="flex-1 border border-line bg-surface2 h-12 px-3 text-[16px] text-ink"
+            style={{ borderRadius: 0 }}
+            placeholder=""
+            placeholderTextColor={theme.colors.ink2}
+            secureTextEntry={!showConfirm}
+            value={confirmPassword}
+            onChangeText={(v) => {
+              setErrors((prev) => ({ ...prev, confirmPassword: undefined }))
+              setConfirmPassword(v)
+            }}
+          />
+          <TouchableOpacity
+            className="border border-l-0 border-line bg-surface2 h-12 px-3 justify-center"
+            onPress={() => setShowConfirm((prev) => !prev)}
+          >
+            <Text className="text-[12px] text-ink2">{showConfirm ? "OCULTAR" : "VER"}</Text>
+          </TouchableOpacity>
+        </View>
+        {errors.confirmPassword && (
+          <Text className="text-[12px] text-neg mt-1">{errors.confirmPassword}</Text>
+        )}
+
+        {/* Button */}
+        <TouchableOpacity
+          className="bg-acc h-12 items-center justify-center mt-6"
+          style={{ borderRadius: 0, opacity: loading ? 0.6 : 1 }}
+          onPress={handleRegister}
+          disabled={loading}
+        >
+          {loading ? (
+            <ActivityIndicator color={theme.colors.accInk} />
+          ) : (
+            <Text className="text-acc-ink text-[14px] font-semibold" style={{ letterSpacing: 1 }}>
+              Cadastrar e entrar
+            </Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Link voltar */}
+        <TouchableOpacity className="items-center mt-5" onPress={() => navigation.goBack()}>
+          <Text className="text-ink2 text-[14px]">Já tenho conta</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
-  );
+  )
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: theme.colors.background,
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: theme.spacing.lg,
-    justifyContent: "center",
-    paddingVertical: theme.spacing.xl,
-  },
-  header: {
-    marginBottom: theme.spacing.xl,
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: theme.colors.text,
-    marginBottom: theme.spacing.xs,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: theme.colors.textSecondary,
-  },
-  form: {
-    gap: theme.spacing.md,
-  },
-  inputGroup: {
-    gap: theme.spacing.xs,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: theme.colors.text,
-  },
-  input: {
-    backgroundColor: theme.colors.surface,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: theme.borderRadius.md,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm + 4,
-    fontSize: 16,
-    color: theme.colors.text,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    borderRadius: theme.borderRadius.md,
-    paddingVertical: theme.spacing.md,
-    alignItems: "center",
-    marginTop: theme.spacing.sm,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  linkButton: {
-    alignItems: "center",
-    paddingVertical: theme.spacing.sm,
-  },
-  linkText: {
-    color: theme.colors.textSecondary,
-    fontSize: 14,
-  },
-  linkTextBold: {
-    color: theme.colors.primary,
-    fontWeight: "600",
-  },
-});
